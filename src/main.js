@@ -1,17 +1,22 @@
 import './style.css';
-import { galleryItems } from './gallery.js';
+import { loadGallery } from './gallery.js';
+
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const grid = document.querySelector('#galleryGrid');
 const filters = [...document.querySelectorAll('.filter')];
 const lightbox = document.querySelector('#lightbox');
 const lbImage = document.querySelector('#lightboxImage');
 const lbCaption = document.querySelector('#lightboxCaption');
-let activeItems = galleryItems;
+let galleryItems = [];
+let activeItems = [];
+let activeFilter = 'all';
 let activeIndex = 0;
 const categoryNames = { gel:'Pose Gel', nailart:'Nail Art', french:'French', pedicure:'Pédicure', creations:'Créations' };
-function renderGallery(filter='all') {
+function renderGallery(filter=activeFilter) {
+  activeFilter = filter;
   activeItems = galleryItems.filter(item => filter === 'all' || item.category === filter);
-  grid.innerHTML = activeItems.map((item,index) => `<button class="gallery-item ${index%5===0?'gallery-tall':''}" data-index="${index}" aria-label="Voir ${item.title}"><img src="${item.src}" alt="${item.title}" loading="lazy"><span class="gallery-overlay"><small>${categoryNames[item.category] || 'Création'}</small><b>${item.title}</b><i>↗</i></span>${item.local?'':'<span class="inspiration-label">INSPIRATION</span>'}</button>`).join('');
+  grid.innerHTML = activeItems.map((item,index) => `<button class="gallery-item ${index%5===0?'gallery-tall':''}" data-index="${index}" aria-label="Voir ${esc(item.title)}"><img src="${esc(item.src)}" alt="${esc(item.title)}" loading="lazy"><span class="gallery-overlay"><small>${categoryNames[item.category] || 'Création'}</small><b>${esc(item.title)}</b><i>↗</i></span>${item.local?'':'<span class="inspiration-label">INSPIRATION</span>'}</button>`).join('');
   grid.querySelectorAll('.gallery-item').forEach(el => el.addEventListener('click', () => openLightbox(Number(el.dataset.index))));
 }
 function openLightbox(index) { activeIndex=index; updateLightbox(); lightbox.classList.add('open'); lightbox.setAttribute('aria-hidden','false'); document.body.classList.add('modal-open'); }
@@ -24,7 +29,7 @@ lightbox.querySelector('.lightbox-prev').addEventListener('click',()=>stepLightb
 lightbox.querySelector('.lightbox-next').addEventListener('click',()=>stepLightbox(1));
 lightbox.addEventListener('click',e=>{if(e.target===lightbox)closeLightbox();});
 document.addEventListener('keydown',e=>{if(!lightbox.classList.contains('open'))return;if(e.key==='Escape')closeLightbox();if(e.key==='ArrowLeft')stepLightbox(-1);if(e.key==='ArrowRight')stepLightbox(1);});
-renderGallery();
+loadGallery().then((items) => { galleryItems = items; renderGallery(); });
 
 const menuToggle=document.querySelector('#menuToggle');const nav=document.querySelector('#mainNav');
 menuToggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Fermer le menu':'Ouvrir le menu');document.body.classList.toggle('nav-open',open);});

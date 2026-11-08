@@ -20,55 +20,16 @@ Le site compilé est généré dans `dist/`.
 
 ## Déploiement sur GitHub Pages
 
-1. Créez un dépôt GitHub et ajoutez tous les fichiers de ce projet.
-2. Si le dépôt porte un nom autre que `username.github.io`, ouvrez `vite.config.js` et remplacez `base: '/'` par `base: '/NOM-DU-DEPOT/'`.
-3. Dans GitHub, ouvrez **Settings → Pages**.
-4. Choisissez **GitHub Actions** comme source de déploiement.
-5. Ajoutez un workflow `.github/workflows/deploy.yml` (exemple ci-dessous), puis poussez vos changements sur `main`.
+Le site est publié automatiquement par `.github/workflows/deploy.yml` à chaque envoi sur `main` :
+https://georgesginfo.github.io/fens-nail-tech-site/
 
-```yaml
-name: Deploy Vite site to GitHub Pages
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm install
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-```
+Le chemin de base est réglé dans `vite.config.js` (`base: '/fens-nail-tech-site/'`). Si le dépôt est renommé, mettez ce chemin à jour, ainsi que `GITHUB_REPO` dans `src/gallery.js`.
 
-## Mettre vos photos dans la galerie
+## Galerie
 
-Ajoutez les images dans `src/assets/gallery/`. Formats : JPG, JPEG, PNG, WEBP, AVIF. Préfixez le nom avec `gel-`, `nailart-`, `french-`, `pedicure-` ou `creations-` pour leur attribuer une catégorie. Le site les détecte automatiquement à la compilation via `import.meta.glob`. Après ajout : `npm run build`, puis redéployez. Consultez `src/assets/gallery/README.md`.
+La galerie suit le dossier `public/gallery/` du dépôt : ajoutez ou supprimez des photos directement sur GitHub (**Add file → Upload files**) et le site se met à jour sans rien recompiler. Les règles de nommage (catégories) sont dans `public/gallery/README.md`.
 
-La galerie contient aussi des images d'inspiration externes signalées « INSPIRATION » ; elles ne sont pas présentées comme des réalisations vérifiées du salon. Vous pouvez les retirer de `src/gallery.js` quand vos propres photos sont prêtes.
+Tant que le dossier ne contient aucune photo, des images d'inspiration marquées « INSPIRATION » s'affichent.
 
 ## Modifier les coordonnées
 
